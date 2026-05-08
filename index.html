@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presensi Bimtek Live</title>
+    <title>Presensi Bimtek Validasi Database</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -44,21 +44,21 @@
         tbody td { padding: 12px; border-bottom: 1px solid var(--border-color); }
         .empty-state { text-align: center; padding: 40px; color: #9ca3af; font-style: italic; }
 
-        /* Modal / Popup Styles */
+        /* Modal Styles */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; }
+        .modal-box { background: white; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
         .modal-overlay.active .modal-box { transform: translateY(0); }
         .modal-icon { font-size: 48px; margin-bottom: 16px; display: block; }
         .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
         .modal-close { background: var(--primary-color); color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         
-        /* Styles khusus Warning */
+        /* Modal Warning */
         .modal-box.warning .modal-title { color: var(--danger-color); }
         .modal-box.warning .modal-icon { color: var(--danger-color); }
         .modal-box.warning .modal-close { background: var(--danger-color); }
         
-        /* Styles khusus Success */
+        /* Modal Success */
         .modal-box.success .modal-title { color: var(--success-color); }
         .modal-box.success .modal-icon { color: var(--success-color); }
         .modal-box.success .modal-close { background: var(--success-color); }
@@ -67,32 +67,31 @@
 <body>
 
     <header>
-        <h1>📝 Presensi Bimtek (Live Sync)</h1>
-        <p>Data langsung tersimpan ke Google Spreadsheet</p>
+        <h1>📝 Presensi Bimtek (Validasi Database)</h1>
+        <p>System mengecek NIP di Spreadsheet Cloud secara real-time</p>
     </header>
 
     <div class="container">
         <div class="main-layout">
             
-            <!-- Form Input -->
             <section class="card">
                 <div class="card-header">
-                    Form Input Peserta
+                    Form Input
                 </div>
                 <form id="attendanceForm">
                     <div class="form-group">
                         <label for="nip">NIP (Nomor Induk Pegawai)</label>
-                        <input type="text" id="nip" class="form-control" placeholder="Contoh: 1980..." required autocomplete="off">
+                        <input type="text" id="nip" class="form-control" placeholder="Masukkan NIP..." required autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="nama">Nama Lengkap</label>
-                        <input type="text" id="nama" class="form-control" placeholder="Nama Lengkap" required autocomplete="off">
+                        <input type="text" id="nama" class="form-control" placeholder="Nama Peserta" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
-                        <label for="instansi">Instansi / Asal</label>
-                        <input type="text" id="instansi" class="form-control" placeholder="Nama Dinas" required autocomplete="off">
+                        <label for="instansi">Instansi</label>
+                        <input type="text" id="instansi" class="form-control" placeholder="Asal Instansi" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
@@ -100,14 +99,13 @@
                         <input type="text" id="jabatan" class="form-control" placeholder="Jabatan" required autocomplete="off">
                     </div>
 
-                    <button type="submit" id="submitBtn" class="btn btn-primary">Simpan Kehadiran</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Simpan ke Database</button>
                 </form>
             </section>
 
-            <!-- Tabel Data (Local Preview) -->
             <section class="card">
                 <div class="card-header">
-                    <span>Riwayat Input (Sesi Ini)</span>
+                    <span>Data Terkirim (Live)</span>
                 </div>
                 
                 <div class="table-container">
@@ -120,12 +118,10 @@
                                 <th>Nama</th>
                             </tr>
                         </thead>
-                        <tbody id="tableBody">
-                            <!-- Data lokal -->
-                        </tbody>
+                        <tbody id="tableBody"></tbody>
                     </table>
                     <div id="emptyState" class="empty-state">
-                        Menunggu input data...
+                        Belum ada data input baru.
                     </div>
                 </div>
             </section>
@@ -133,25 +129,25 @@
         </div>
     </div>
 
-    <!-- Modal Peringatan NIP Ganda -->
+    <!-- Modal Warning Duplicate -->
     <div id="warningModal" class="modal-overlay">
         <div class="modal-box warning">
             <span class="modal-icon">⚠️</span>
             <h3 class="modal-title">NIP Sudah Terdaftar!</h3>
             <p class="modal-message">
-                Peserta dengan NIP <strong id="dupNipDisplay"></strong> sudah tercatat di sesi ini.
+                Peserta dengan NIP <strong id="dupNipDisplay"></strong> sudah ada di database Spreadsheet.
             </p>
             <button class="modal-close" onclick="closeModal('warningModal')">Mengerti</button>
         </div>
     </div>
 
-    <!-- Modal Sukses -->
+    <!-- Modal Success -->
     <div id="successModal" class="modal-overlay">
         <div class="modal-box success">
             <span class="modal-icon">✅</span>
-            <h3 class="modal-title">Tersimpan!</h3>
+            <h3 class="modal-title">Berhasil Disimpan</h3>
             <p class="modal-message">
-                Data berhasil dikirim ke Spreadsheet.
+                Data peserta telah masuk ke database.
             </p>
             <button class="modal-close" onclick="closeModal('successModal')">Lanjut</button>
         </div>
@@ -159,91 +155,88 @@
 
     <script>
         // ============================================
-        // KONFIGURASI PENTING: MASUKKAN URL SCRIPT DISINI
+        // MASUKKAN URL WEB APP SCRIPT ANDA DI SINI
         // ============================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXKCjY8ka7uoGCy3BSx6qa9vgJ3MWA31CoIaDWSHWMCmpwFirhOp4WjnJWY8dFWQCR/exec";
         
-        // Variabel untuk menyimpan NIP lokal di sesi browser ini (untuk deteksi ganda sementara)
-        let localParticipants = JSON.parse(localStorage.getItem('bimtekSessionData')) || [];
+        // Variabel untuk menampilkan data di tabel samping (hanya sementara di browser)
+        let localSessionData = JSON.parse(localStorage.getItem('bimtekSessionData')) || [];
 
         const form = document.getElementById('attendanceForm');
         const submitBtn = document.getElementById('submitBtn');
         const tableBody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
+        const nipInput = document.getElementById('nip');
 
-        // Init
-        renderLocalTable();
+        renderTable();
 
         form.addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const nip = document.getElementById('nip').value.trim();
+            const nip = nipInput.value.trim();
             const nama = document.getElementById('nama').value.trim();
             const instansi = document.getElementById('instansi').value.trim();
             const jabatan = document.getElementById('jabatan').value.trim();
 
-            // 1. Validasi NIP Ganda (Lokal Sesi Ini)
-            // Ini mencegah user menginput NIP yang sama berulang kali di browser yang sama
-            if (localParticipants.some(p => p.nip === nip)) {
-                document.getElementById('dupNipDisplay').textContent = nip;
-                openModal('warningModal');
-                return;
-            }
+            const formData = { nip: nip, nama: nama, instansi: instansi, jabatan: jabatan };
 
-            // 2. Siapkan Data
-            const formData = {
-                nip: nip,
-                nama: nama,
-                instansi: instansi,
-                jabatan: jabatan
-            };
-
-            // 3. Kirim ke Google Sheets
+            // UI Loading State
             submitBtn.disabled = true;
-            submitBtn.textContent = "Mengirim...";
+            submitBtn.textContent = "Sedang Mengecek Database...";
 
+            // Kirim ke Google Apps Script
             fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(formData)
             })
             .then(res => res.json())
             .then(data => {
-                // Jika Sukses
-                if (data.result === "success") {
-                    // Simpan ke Local Memory agar user bisa melihat di tabel sebelah kanan
+                // Cek respon dari Server
+                if (data.result === "duplicate") {
+                    // --- KASUS 1: NIP DUPLIKAT ---
+                    document.getElementById('dupNipDisplay').textContent = nip;
+                    openModal('warningModal');
+                    // Form TIDAK direset, agar user bisa melihat errornya
+                    
+                } else if (data.result === "success") {
+                    // --- KASUS 2: BERHASIL SIMPAN ---
+                    // Simpan ke local storage untuk tampilan tabel samping
                     const newEntry = {
                         nip: nip,
                         nama: nama,
                         timestamp: new Date().toLocaleTimeString('id-ID')
                     };
-                    localParticipants.push(newEntry);
-                    localStorage.setItem('bimtekSessionData', JSON.stringify(localParticipants));
+                    localSessionData.push(newEntry);
+                    localStorage.setItem('bimtekSessionData', JSON.stringify(localSessionData));
                     
-                    renderLocalTable();
+                    renderTable();
                     form.reset();
+                    nipInput.focus();
                     openModal('successModal');
                 } else {
-                    alert("Terjadi kesalahan server: " + data.message);
+                    // --- KASUS 3: ERROR SERVER ---
+                    alert("Error dari server: " + (data.message || "Unknown error"));
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert("Gagal menghubungi server Spreadsheet. Periksa koneksi internet.");
+                alert("Gagal menghubungi server. Cek koneksi internet atau URL Script.");
             })
             .finally(() => {
+                // Kembalikan tombol ke kondisi normal
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Simpan Kehadiran";
+                submitBtn.textContent = "Simpan ke Database";
             });
         });
 
-        function renderLocalTable() {
+        function renderTable() {
             tableBody.innerHTML = '';
-            if (localParticipants.length === 0) {
+            if (localSessionData.length === 0) {
                 emptyState.style.display = 'block';
                 return;
             }
             emptyState.style.display = 'none';
-            localParticipants.forEach((p, i) => {
+            localSessionData.forEach((p, i) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${i + 1}</td>
