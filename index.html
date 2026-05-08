@@ -19,8 +19,53 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 30px; }
-        header h1 { color: var(--primary-color); }
+
+        /* --- Updated Header Styles --- */
+        header {
+            background-color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            
+            /* Flexbox untuk menyusun Logo dan Teks berdampingan */
+            display: flex;
+            align-items: center; /* Vertikal tengah */
+            justify-content: center;
+            gap: 20px; /* Jarak antara logo dan teks */
+        }
+
+        .header-logo {
+            height: 65px; /* Sesuaikan tinggi logo dengan ukuran judul */
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.8rem; /* Ukuran dasar judul */
+            margin-bottom: 5px;
+            line-height: 1.2;
+        }
+
+        header p {
+            color: #6b7280;
+            font-size: 1rem;
+        }
+
+        /* Responsif: Stack vertikal pada layar kecil */
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                padding: 20px;
+            }
+            header h1 { font-size: 1.5rem; }
+        }
+        /* --- End Header Styles --- */
 
         .main-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
         @media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } }
@@ -67,8 +112,15 @@
 <body>
 
     <header>
-        <h1>📝 Presensi Bimtek (Validasi Database)</h1>
-        <p>System mengecek NIP di Spreadsheet Cloud secara real-time</p>
+        <!-- Logo sesuai request URL -->
+        <img src="https://z-cdn-media.chatglm.cn/files/0fac7b6b-a6ff-42e3-97f1-bd7ae6dea619.png?auth_key=1878244484-6bc2bb7a9b9d4bfd98ef1c56fe54229c-0-b3a8dc17b972535758b7e369186a6d1c" 
+             alt="Logo Bimtek" 
+             class="header-logo">
+        
+        <div class="header-content">
+            <h1>Presensi Bimtek (Validasi Database)</h1>
+            <p>System mengecek NIP di Spreadsheet Cloud secara real-time</p>
+        </div>
     </header>
 
     <div class="container">
