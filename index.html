@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Presensi Kehadiran Peserta Zoom</title>
+    <title>Presensi Bimtek + Foto</title>
     <style>
         :root {
             --primary-color: #2563eb;
@@ -20,63 +20,42 @@
         body { background-color: var(--bg-color); color: var(--text-color); line-height: 1.6; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
 
-        /* --- Updated Header Styles --- */
         header {
-            background-color: white;
-            padding: 20px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-            
-            /* Flexbox untuk menyusun Logo dan Teks berdampingan */
-            display: flex;
-            align-items: center; /* Vertikal tengah */
-            justify-content: center;
-            gap: 20px; /* Jarak antara logo dan teks */
+            background-color: white; padding: 20px 40px; border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 30px;
+            display: flex; align-items: center; justify-content: center; gap: 20px;
         }
 
-        .header-logo {
-            height: 65px; /* Sesuaikan tinggi logo dengan ukuran judul */
-            width: auto;
-            object-fit: contain;
-        }
+        .header-logo { height: 65px; width: auto; object-fit: contain; }
+        .header-content { text-align: center; }
+        header h1 { color: var(--primary-color); font-size: 1.8rem; margin-bottom: 5px; }
+        header p { color: #6b7280; font-size: 1rem; }
 
-        .header-content {
-            text-align: center;
-        }
-
-        header h1 {
-            color: var(--primary-color);
-            font-size: 1.8rem; /* Ukuran dasar judul */
-            margin-bottom: 5px;
-            line-height: 1.2;
-        }
-
-        header p {
-            color: #6b7280;
-            font-size: 1rem;
-        }
-
-        /* Responsif: Stack vertikal pada layar kecil */
         @media (max-width: 600px) {
-            header {
-                flex-direction: column;
-                padding: 20px;
-            }
+            header { flex-direction: column; padding: 20px; }
             header h1 { font-size: 1.5rem; }
         }
-        /* --- End Header Styles --- */
 
         .main-layout { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
         @media (max-width: 768px) { .main-layout { grid-template-columns: 1fr; } }
 
         .card { background: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 24px; height: fit-content; }
-        .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; font-size: 1.25rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+        .card-header { border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; font-size: 1.25rem; font-weight: 600; }
 
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.9rem; }
         .form-control { width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 1rem; }
         .form-control:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+        
+        /* File Input Styling */
+        .file-preview {
+            margin-top: 10px;
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            display: none;
+        }
 
         .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 20px; border: none; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; width: 100%; font-size: 1rem; }
         .btn-primary { background-color: var(--primary-color); color: white; }
@@ -87,9 +66,10 @@
         table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
         thead th { background-color: #f8fafc; color: #475569; font-weight: 600; text-align: left; padding: 12px; position: sticky; top: 0; border-bottom: 2px solid var(--border-color); }
         tbody td { padding: 12px; border-bottom: 1px solid var(--border-color); }
+        .table-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid #ddd; }
         .empty-state { text-align: center; padding: 40px; color: #9ca3af; font-style: italic; }
 
-        /* Modal Styles */
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box { background: white; padding: 24px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; transform: translateY(20px); transition: transform 0.3s ease; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
@@ -98,12 +78,10 @@
         .modal-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 8px; }
         .modal-close { background: var(--primary-color); color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 10px; }
         
-        /* Modal Warning */
         .modal-box.warning .modal-title { color: var(--danger-color); }
         .modal-box.warning .modal-icon { color: var(--danger-color); }
         .modal-box.warning .modal-close { background: var(--danger-color); }
         
-        /* Modal Success */
         .modal-box.success .modal-title { color: var(--success-color); }
         .modal-box.success .modal-icon { color: var(--success-color); }
         .modal-box.success .modal-close { background: var(--success-color); }
@@ -112,14 +90,10 @@
 <body>
 
     <header>
-        <!-- Logo sesuai request URL -->
-        <img src="https://z-cdn-media.chatglm.cn/files/0fac7b6b-a6ff-42e3-97f1-bd7ae6dea619.png?auth_key=1878244484-6bc2bb7a9b9d4bfd98ef1c56fe54229c-0-b3a8dc17b972535758b7e369186a6d1c" 
-             alt="Logo Bimtek" 
-             class="header-logo">
-        
+        <img src="https://z-cdn-media.chatglm.cn/files/0fac7b6b-a6ff-42e3-97f1-bd7ae6dea619.png?auth_key=1878244484-6bc2bb7a9b9d4bfd98ef1c56fe54229c-0-b3a8dc17b972535758b7e369186a6d1c" alt="Logo" class="header-logo">
         <div class="header-content">
-            <h1>Presensi Kehadiran Peserta Zoom</h1>
-            <p>Sistem Pencatat Kehadiran Peserta Kegiatan Sub Data dan Informasi BKPSDM Bangkalan</p>
+            <h1>Presensi Bimtek + Bukti Foto</h1>
+            <p>Lampirkan Foto/Screenshot bukti kehadiran</p>
         </div>
     </header>
 
@@ -142,22 +116,30 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="instansi">Nama OPD</label>
-                        <input type="text" id="instansi" class="form-control" placeholder="Ketik Nama OPD" required autocomplete="off">
+                        <label for="instansi">Instansi</label>
+                        <input type="text" id="instansi" class="form-control" placeholder="Asal Instansi" required autocomplete="off">
                     </div>
 
                     <div class="form-group">
                         <label for="jabatan">Jabatan</label>
-                        <input type="text" id="jabatan" class="form-control" placeholder="Jabatan saat ini" required autocomplete="off">
+                        <input type="text" id="jabatan" class="form-control" placeholder="Jabatan" required autocomplete="off">
                     </div>
 
-                    <button type="submit" id="submitBtn" class="btn btn-primary">Simpan ke Database</button>
+                    <!-- Input File Baru -->
+                    <div class="form-group">
+                        <label for="foto">Bukti Foto / Screenshot</label>
+                        <input type="file" id="foto" class="form-control" accept="image/*" required>
+                        <!-- Preview Gambar Lokal -->
+                        <img id="previewImage" class="file-preview" alt="Preview Foto">
+                    </div>
+
+                    <button type="submit" id="submitBtn" class="btn btn-primary">Simpan & Upload Foto</button>
                 </form>
             </section>
 
             <section class="card">
                 <div class="card-header">
-                    <span>Bukti Data Terkirim</span>
+                    <span>Data Terkirim</span>
                 </div>
                 
                 <div class="table-container">
@@ -165,9 +147,8 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Waktu</th>
-                                <th>NIP</th>
-                                <th>Nama</th>
+                                <th>Foto</th>
+                                <th>NIP & Nama</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody"></tbody>
@@ -187,7 +168,7 @@
             <span class="modal-icon">⚠️</span>
             <h3 class="modal-title">NIP Sudah Terdaftar!</h3>
             <p class="modal-message">
-                Peserta dengan NIP <strong id="dupNipDisplay"></strong> sudah ada di database Spreadsheet.
+                Peserta dengan NIP <strong id="dupNipDisplay"></strong> sudah ada di database.
             </p>
             <button class="modal-close" onclick="closeModal('warningModal')">Mengerti</button>
         </div>
@@ -197,9 +178,9 @@
     <div id="successModal" class="modal-overlay">
         <div class="modal-box success">
             <span class="modal-icon">✅</span>
-            <h3 class="modal-title">Berhasil Disimpan</h3>
+            <h3 class="modal-title">Berhasil Disimpan!</h3>
             <p class="modal-message">
-                Data peserta telah masuk ke database.
+                Data peserta dan Foto telah tersimpan.
             </p>
             <button class="modal-close" onclick="closeModal('successModal')">Lanjut</button>
         </div>
@@ -207,55 +188,92 @@
 
     <script>
         // ============================================
-        // MASUKKAN URL WEB APP SCRIPT ANDA DI SINI
+        // MASUKKAN URL SCRIPT ANDA DI SINI
         // ============================================
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXKCjY8ka7uoGCy3BSx6qa9vgJ3MWA31CoIaDWSHWMCmpwFirhOp4WjnJWY8dFWQCR/exec";
         
-        // Variabel untuk menampilkan data di tabel samping (hanya sementara di browser)
         let localSessionData = JSON.parse(localStorage.getItem('bimtekSessionData')) || [];
 
         const form = document.getElementById('attendanceForm');
         const submitBtn = document.getElementById('submitBtn');
+        const fileInput = document.getElementById('foto');
+        const previewImg = document.getElementById('previewImage');
         const tableBody = document.getElementById('tableBody');
         const emptyState = document.getElementById('emptyState');
-        const nipInput = document.getElementById('nip');
 
         renderTable();
 
-        form.addEventListener('submit', function(e) {
+        // 1. Event Listener untuk Preview Foto
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewImg.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                previewImg.style.display = 'none';
+            }
+        });
+
+        // 2. Event Listener Submit Form
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            const nip = nipInput.value.trim();
+            const nip = document.getElementById('nip').value.trim();
             const nama = document.getElementById('nama').value.trim();
             const instansi = document.getElementById('instansi').value.trim();
             const jabatan = document.getElementById('jabatan').value.trim();
+            const file = fileInput.files[0];
 
-            const formData = { nip: nip, nama: nama, instansi: instansi, jabatan: jabatan };
+            // Validasi File
+            if (!file) {
+                alert("Mohon lampirkan foto/screenshot.");
+                return;
+            }
 
-            // UI Loading State
+            // UI Loading
             submitBtn.disabled = true;
-            submitBtn.textContent = "Sedang Mengecek Database...";
+            submitBtn.textContent = "Mengupload & Mengecek...";
 
-            // Kirim ke Google Apps Script
-            fetch(SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(formData)
-            })
-            .then(res => res.json())
-            .then(data => {
-                // Cek respon dari Server
+            try {
+                // Convert File to Base64
+                const base64Data = await toBase64(file);
+                
+                // Pisahkan mimeType dan raw Data Base64 (Untuk Google Apps Script)
+                const splitData = base64Data.split(',');
+                const mimeType = splitData[0].match(/:(.*?);/)[1];
+                const rawBase64 = splitData[1];
+
+                // Persiapkan Payload
+                const payload = {
+                    nip: nip,
+                    nama: nama,
+                    instansi: instansi,
+                    jabatan: jabatan,
+                    photoData: rawBase64,
+                    mimeType: mimeType
+                };
+
+                // Kirim ke Server
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+
                 if (data.result === "duplicate") {
-                    // --- KASUS 1: NIP DUPLIKAT ---
                     document.getElementById('dupNipDisplay').textContent = nip;
                     openModal('warningModal');
-                    // Form TIDAK direset, agar user bisa melihat errornya
-                    
                 } else if (data.result === "success") {
-                    // --- KASUS 2: BERHASIL SIMPAN ---
-                    // Simpan ke local storage untuk tampilan tabel samping
+                    // Simpan data lokal untuk tabel samping (kita simpan base64 lokal untuk preview cepat)
                     const newEntry = {
                         nip: nip,
                         nama: nama,
+                        photoBase64: base64Data, // Simpan base64 lokal untuk preview
                         timestamp: new Date().toLocaleTimeString('id-ID')
                     };
                     localSessionData.push(newEntry);
@@ -263,23 +281,30 @@
                     
                     renderTable();
                     form.reset();
-                    nipInput.focus();
+                    previewImg.style.display = 'none';
                     openModal('successModal');
                 } else {
-                    // --- KASUS 3: ERROR SERVER ---
-                    alert("Error dari server: " + (data.message || "Unknown error"));
+                    alert("Error Server: " + (data.message || "Unknown"));
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert("Gagal menghubungi server. Cek koneksi internet atau URL Script.");
-            })
-            .finally(() => {
-                // Kembalikan tombol ke kondisi normal
+
+            } catch (error) {
+                console.error(error);
+                alert("Gagal mengupload. Cek koneksi internet.");
+            } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = "Simpan ke Database";
-            });
+                submitBtn.textContent = "Simpan & Upload Foto";
+            }
         });
+
+        // Helper function: File -> Base64 Promise
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
 
         function renderTable() {
             tableBody.innerHTML = '';
@@ -292,9 +317,11 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${i + 1}</td>
-                    <td>${p.timestamp}</td>
-                    <td><strong>${p.nip}</strong></td>
-                    <td>${p.nama}</td>
+                    <td><img src="${p.photoBase64}" class="table-thumb" alt="Foto"></td>
+                    <td>
+                        <strong>${p.nip}</strong><br>
+                        ${p.nama}
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
