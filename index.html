@@ -1,1 +1,563 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Presensi Bimtek Peserta</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger-color: #dc2626;
+            --success-color: #16a34a;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        /* Container Utama */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+
+        header p {
+            color: #6b7280;
+        }
+
+        /* Layout Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            height: fit-content;
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+            width: auto;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+        }
+
+        .btn-success:hover {
+            background-color: #15803d;
+        }
+
+        /* Table Styles (Spreadsheet Look) */
+        .table-container {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead th {
+            background-color: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            position: sticky;
+            top: 0;
+            border-bottom: 2px solid var(--border-color);
+            z-index: 10;
+        }
+
+        tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: #334155;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        /* Modal / Popup Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: translateY(0);
+        }
+
+        .modal-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .modal-message {
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .modal-close {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Warning specific styles */
+        .modal-box.warning .modal-title { color: var(--danger-color); }
+        .modal-box.warning .modal-icon { color: var(--danger-color); }
+        .modal-box.warning .modal-close { background: var(--danger-color); }
+        .modal-box.warning .modal-close:hover { background: #b91c1c; }
+
+        /* Success specific styles */
+        .modal-box.success .modal-title { color: var(--success-color); }
+        .modal-box.success .modal-icon { color: var(--success-color); }
+        .modal-box.success .modal-close { background: var(--success-color); }
+        .modal-box.success .modal-close:hover { background: #15803d; }
+
+        /* Stats */
+        .stats-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📝 Sistem Presensi Bimtek</h1>
+        <p>Pencatatan Kehadiran Peserta Pelatihan</p>
+    </header>
+
+    <div class="container">
+        <div class="main-layout">
+            
+            <!-- Bagian Form Input -->
+            <section class="card">
+                <div class="card-header">
+                    Form Input Peserta
+                </div>
+                <form id="attendanceForm">
+                    <div class="form-group">
+                        <label for="nip">NIP (Nomor Induk Pegawai)</label>
+                        <input type="text" id="nip" class="form-control" placeholder="Contoh: 19800101..." required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="nama">Nama Lengkap</label>
+                        <input type="text" id="nama" class="form-control" placeholder="Nama Lengkap dengan Gelar" required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="instansi">Instansi / Asal</label>
+                        <input type="text" id="instansi" class="form-control" placeholder="Nama Dinas atau Kantor" required autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jabatan">Jabatan</label>
+                        <input type="text" id="jabatan" class="form-control" placeholder="Jabatan Saat ini" required autocomplete="off">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Simpan Kehadiran</button>
+                </form>
+            </section>
+
+            <!-- Bagian Tabel Data (Spreadsheet) -->
+            <section class="card">
+                <div class="card-header">
+                    <span>Data Peserta (Database)</span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="stats-badge" id="countBadge">0 Peserta</span>
+                        <button onclick="exportToCSV()" class="btn btn-success" title="Download Excel">
+                            📥 Unduh Excel (.csv)
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>Waktu Input</th>
+                                <th>NIP</th>
+                                <th>Nama Lengkap</th>
+                                <th>Instansi</th>
+                                <th>Jabatan</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data akan muncul di sini via JavaScript -->
+                        </tbody>
+                    </table>
+                    <div id="emptyState" class="empty-state">
+                        Belum ada data peserta yang masuk.
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Modal Pop-up Peringatan (Duplicate NIP) -->
+    <div id="warningModal" class="modal-overlay">
+        <div class="modal-box warning">
+            <span class="modal-icon">⚠️</span>
+            <h3 class="modal-title">NIP Sudah Terdaftar!</h3>
+            <p class="modal-message">
+                Peserta dengan NIP <strong id="dupNipDisplay"></strong> sudah tercatat mengisi daftar hadir sebelumnya. Silakan periksa kembali.
+            </p>
+            <button class="modal-close" onclick="closeModal('warningModal')">Mengerti</button>
+        </div>
+    </div>
+
+    <!-- Modal Pop-up Sukses -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-box success">
+            <span class="modal-icon">✅</span>
+            <h3 class="modal-title">Berhasil Disimpan</h3>
+            <p class="modal-message">
+                Data peserta telah berhasil ditambahkan ke database spreadsheet.
+            </p>
+            <button class="modal-close" onclick="closeModal('successModal')">Lanjut</button>
+        </div>
+    </div>
+
+    <script>
+        // --- State Management ---
+        // Kita menggunakan LocalStorage agar data tidak hilang saat di-refresh
+        let participants = JSON.parse(localStorage.getItem('bimtekData')) || [];
+
+        // --- DOM Elements ---
+        const form = document.getElementById('attendanceForm');
+        const nipInput = document.getElementById('nip');
+        const tableBody = document.getElementById('tableBody');
+        const emptyState = document.getElementById('emptyState');
+        const countBadge = document.getElementById('countBadge');
+
+        // --- Init ---
+        renderTable();
+
+        // --- Event Listener: Form Submit ---
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Mencegah reload halaman
+
+            const nip = nipInput.value.trim();
+            const nama = document.getElementById('nama').value.trim();
+            const instansi = document.getElementById('instansi').value.trim();
+            const jabatan = document.getElementById('jabatan').value.trim();
+
+            // Validasi Input NIP Kosong
+            if (!nip) {
+                alert("NIP tidak boleh kosong");
+                return;
+            }
+
+            // 1. DETEKSI NIP GANDA
+            // Kita cek apakah NIP sudah ada di dalam array 'participants'
+            const isDuplicate = participants.some(p => p.nip === nip);
+
+            if (isDuplicate) {
+                // Tampilkan Pop-up Peringatan
+                document.getElementById('dupNipDisplay').textContent = nip;
+                openModal('warningModal');
+                // Fokus kembali ke field NIP agar user mudah mengoreksi
+                nipInput.focus();
+                return; // Hentikan proses simpan
+            }
+
+            // 2. Jika Unik, Tambahkan Data
+            const newParticipant = {
+                id: Date.now(), // ID unik timestamp
+                timestamp: new Date().toLocaleString('id-ID'),
+                nip: nip,
+                nama: nama,
+                instansi: instansi,
+                jabatan: jabatan
+            };
+
+            participants.push(newParticipant);
+            saveData();
+            
+            // Reset Form
+            form.reset();
+            nipInput.focus();
+
+            // Update Tampilan
+            renderTable();
+
+            // Tampilkan Pesan Sukses
+            openModal('successModal');
+        });
+
+        // --- Core Functions ---
+
+        function saveData() {
+            // Simpan ke LocalStorage browser
+            localStorage.setItem('bimtekData', JSON.stringify(participants));
+        }
+
+        function deleteParticipant(id) {
+            if(confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+                participants = participants.filter(p => p.id !== id);
+                saveData();
+                renderTable();
+            }
+        }
+
+        function renderTable() {
+            // Bersihkan tabel
+            tableBody.innerHTML = '';
+
+            // Update Counter
+            countBadge.textContent = `${participants.length} Peserta`;
+
+            if (participants.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            } else {
+                emptyState.style.display = 'none';
+            }
+
+            // Loop data dan buat baris HTML
+            participants.forEach((p, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="font-size: 0.85rem; color: #666;">${p.timestamp}</td>
+                    <td><strong>${p.nip}</strong></td>
+                    <td>${p.nama}</td>
+                    <td>${p.instansi}</td>
+                    <td>${p.jabatan}</td>
+                    <td style="text-align: center;">
+                        <button onclick="deleteParticipant(${p.id})" style="color: #dc2626; background: none; border: none; cursor: pointer; font-weight: bold;">Hapus</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // --- Modal Logic ---
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Menutup modal jika user mengklik di area gelap (overlay) di luar kotak
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // --- Export to Excel (CSV) Function ---
+        function exportToCSV() {
+            if (participants.length === 0) {
+                alert("Tidak ada data untuk diunduh.");
+                return;
+            }
+
+            // Header CSV
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "No,Tanggal Input,NIP,Nama Lengkap,Instansi,Jabatan\n";
+
+            // Isi CSV
+            participants.forEach((p, index) => {
+                // Membersihkan koma di text agar tidak merusak format CSV
+                const cleanInstansi = p.instansi.replace(/,/g, " ");
+                const cleanJabatan = p.jabatan.replace(/,/g, " ");
+                
+                const row = [
+                    index + 1,
+                    `"${p.timestamp}"`,
+                    `"${p.nip}"`,
+                    `"${p.nama}"`,
+                    `"${cleanInstansi}"`,
+                    `"${cleanJabatan}"`
+                ].join(",");
+                csvContent += row + "\n";
+            });
+
+            // Membuat Link Download
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            
+            // Menambahkan BOM agar Excel membaca karakter khusus (titik koma, nama Indonesia) dengan benar
+            const bom = "\uFEFF"; 
+            const blob = new Blob([bom + csvContent.replace("data:text/csv;charset=utf-8,", "")], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute("href", url);
+            link.setAttribute("download", "Daftar_Hadir_Bimtek.csv");
+            document.body.appendChild(link);
+            
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>
