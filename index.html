@@ -133,9 +133,9 @@
                         <img id="previewImage" class="file-preview" alt="Preview Foto">
                     </div>
 
-                    <!--
+                    
                         <button type="submit" id="submitBtn" class="btn btn-primary">Simpan & Upload Foto</button>
-                    -->
+                    
                 </form>
             </section>
 
@@ -192,8 +192,8 @@
         // ============================================
         // MASUKKAN URL SCRIPT ANDA DI SINI
         // ============================================
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXKCjY8ka7uoGCy3BSx6qa9vgJ3MWA31CoIaDWSHWMCmpwFirhOp4WjnJWY8dFWQCR/exec";
-        
+       // const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXKCjY8ka7uoGCy3BSx6qa9vgJ3MWA31CoIaDWSHWMCmpwFirhOp4WjnJWY8dFWQCR/exec";
+        const SCRIPT_URL ="";
         let localSessionData = JSON.parse(localStorage.getItem('bimtekSessionData')) || [];
 
         const form = document.getElementById('attendanceForm');
@@ -291,7 +291,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("Gagal mengupload. Cek koneksi internet.");
+                alert("Mohon maaf Absensi telah ditutup.");
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = "Simpan & Upload Foto";
